@@ -47,12 +47,62 @@ If you want to regenerate the transit routing data from scratch (notebook 04), y
 
 **Current Status:** The repository includes pre-generated routing cache files, so OTP is not required for immediate use of the dashboard or existing data analysis.
 
+**Prerequisites:**
+- Java 11 or higher must be installed on your system
+- Verify Java installation: `java -version`
+
 **OTP Setup Steps (for regeneration only):**
 1. Download OpenTripPlanner 2.5.0 from: https://github.com/opentripplanner/OpenTripPlanner/releases
 2. Download Hamburg GTFS data from: https://suche.transparenz.hamburg.de/dataset/hvv-fahrplandaten-gtfs-mai-2025-bis-dezember-2025
-3. Place the OTP JAR file and GTFS data in an `otp/` folder
-4. Start OTP server: `java -jar otp-2.5.0-shaded.jar --graphs hamburg --port 8080`
-5. The notebook 04_commute_routing.ipynb will connect to `http://localhost:8080/otp/routers/default`
+3. Download Hamburg OSM data from: https://download.geofabrik.de/europe/germany/hamburg.html
+4. Place files in the `otp/` folder with the following structure:
+   - `otp-2.5.0-shaded.jar` (OTP JAR file)
+   - `gtfs/` (folder containing extracted GTFS zip files)
+   - `hamburg.osm.pbf` (rename downloaded OSM file to this name)
+5. Create `build-config.json` and `router-config.json` in the otp folder (see example configs below)
+6. Build the routing graph: `java -Xmx4G -jar otp-2.5.0-shaded.jar --build --save .`
+7. Start OTP server: `java -Xmx4G -jar otp-2.5.0-shaded.jar --load --serve .`
+8. Verify server is running: `curl http://localhost:8080/otp/routers/default` or visit in browser
+9. The notebook 04_commute_routing.ipynb will connect to `http://localhost:8080/otp/routers/default`
+
+**Note:** The `-Xmx4G` flag allocates 4GB of memory for the graph building process. Adjust this based on your system's available memory (e.g., `-Xmx8G` for 8GB).
+
+**Note:** If you already have `graph.obj` in the otp/ folder, you can skip the build step (step 6) and just start the server (step 7).
+
+**Example Configuration Files:**
+
+`build-config.json`:
+```json
+{
+  "area": {
+    "bounds": {
+      "minLat": 53.4,
+      "minLon": 9.6,
+      "maxLat": 53.8,
+      "maxLon": 10.3
+    }
+  },
+  "transit": {
+    "fareService": "default"
+  },
+  "osm": [
+    {
+      "source": "hamburg.osm.pbf"
+    }
+  ]
+}
+```
+
+`router-config.json`:
+```json
+{
+  "routingDefaults": {
+    "walkSpeed": 1.3,
+    "stairsReluctance": 1.5,
+    "timeWindow": 7200
+  }
+}
+```
 
 **Note:** This setup is only needed if you want to regenerate transit routes. The provided routing cache allows the analysis to be demonstrated without OTP.
 
