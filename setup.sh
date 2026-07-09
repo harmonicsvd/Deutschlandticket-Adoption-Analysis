@@ -26,17 +26,17 @@ if conda env list | grep -q "^jandj "; then
     else
         echo "⚠️  Environment exists but appears incomplete (no pip)."
         echo "   Recreating environment..."
-        conda remove -n jandj --all -y 2>/dev/null || rm -rf /Users/varadkulkarni/miniconda3/envs/jandj
+        conda remove -n jandj --all -y 2>/dev/null || rm -rf "$(conda info --base)/envs/jandj"
         echo "📦 Creating conda environment 'jandj'..."
         conda create -n jandj python=3.10 -y
         echo "✅ Environment 'jandj' created"
     fi
 else
     # Check if directory exists but is not a valid conda environment
-    if [ -d "/Users/varadkulkarni/miniconda3/envs/jandj" ]; then
+    if [ -d "$(conda info --base)/envs/jandj" ]; then
         echo "⚠️  Directory exists but is not a valid conda environment."
         echo "   Removing corrupted directory..."
-        rm -rf /Users/varadkulkarni/miniconda3/envs/jandj
+        rm -rf "$(conda info --base)/envs/jandj"
     fi
     echo "📦 Creating conda environment 'jandj'..."
     conda create -n jandj python=3.10 -y
