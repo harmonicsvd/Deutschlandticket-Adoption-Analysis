@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import folium
-from streamlit_folium import folium_static
+from streamlit_folium import st_folium
 import plotly.express as px
 import plotly.graph_objects as go
 import json
@@ -55,7 +55,10 @@ def load_data():
         office_data = json.load(f)
     return commute_df, hvv_stations, office_data
 
-commute_df, hvv_stations, office_data = load_data()
+# Show loading spinner while data loads
+with st.spinner("📊 Loading data... this may take a moment"):
+    commute_df, hvv_stations, office_data = load_data()
+st.toast("✅ Data loaded successfully!", icon="🎉")
 
 # Sidebar - Filters
 st.sidebar.header("🎛️ Filters")
@@ -176,37 +179,38 @@ with tab1:
     
     # Add employees as a separate layer (if selected)
     if st.session_state.show_employees:
-        employee_layer = folium.FeatureGroup(name='Employee Locations')
-        def get_commute_color(commute_time):
-            if pd.isna(commute_time):
-                return 'gray'
-            elif commute_time < 30:
-                return 'green'
-            elif commute_time < 45:
-                return 'blue'
-            elif commute_time < 60:
-                return 'orange'
-            else:
-                return 'red'
-        
-        for idx, row in filtered_df.iterrows():
-            if pd.notna(row['snapped_latitude']) and pd.notna(row['snapped_longitude']):
-                color = get_commute_color(row['total_commute_min'])
-                folium.CircleMarker(
-                    location=[row['snapped_latitude'], row['snapped_longitude']],
-                    radius=5,
-                    color=color,
-                    fill=True,
-                    fillColor=color,
-                    fillOpacity=0.7,
-                    popup=f"""
-                    <b>Employee: {row['employee_id']}</b><br>
-                    Commute Time: {f"{row['total_commute_min']:.1f} min" if pd.notna(row['total_commute_min']) else "No route"}<br>
-                    Adoption Score: {f"{row[f'adoption_score_{scenario}']:.1f}/100" if pd.notna(row[f'adoption_score_{scenario}']) else "N/A"}
-                    """,
-                    tooltip=row['employee_id']
-                ).add_to(employee_layer)
-        employee_layer.add_to(m)
+        with st.spinner("🗺️ Adding employee markers to map..."):
+            employee_layer = folium.FeatureGroup(name='Employee Locations')
+            def get_commute_color(commute_time):
+                if pd.isna(commute_time):
+                    return 'gray'
+                elif commute_time < 30:
+                    return 'green'
+                elif commute_time < 45:
+                    return 'blue'
+                elif commute_time < 60:
+                    return 'orange'
+                else:
+                    return 'red'
+            
+            for idx, row in filtered_df.iterrows():
+                if pd.notna(row['snapped_latitude']) and pd.notna(row['snapped_longitude']):
+                    color = get_commute_color(row['total_commute_min'])
+                    folium.CircleMarker(
+                        location=[row['snapped_latitude'], row['snapped_longitude']],
+                        radius=5,
+                        color=color,
+                        fill=True,
+                        fillColor=color,
+                        fillOpacity=0.7,
+                        popup=f"""
+                        <b>Employee: {row['employee_id']}</b><br>
+                        Commute Time: {f"{row['total_commute_min']:.1f} min" if pd.notna(row['total_commute_min']) else "No route"}<br>
+                        Adoption Score: {f"{row[f'adoption_score_{scenario}']:.1f}/100" if pd.notna(row[f'adoption_score_{scenario}']) else "N/A"}
+                        """,
+                        tooltip=row['employee_id']
+                    ).add_to(employee_layer)
+            employee_layer.add_to(m)
     
     # Add HVV stations as a separate layer (if selected)
     if st.session_state.show_stations:
@@ -224,7 +228,9 @@ with tab1:
             ).add_to(stations_layer)
         stations_layer.add_to(m)
     
-    folium_static(m, width=1200, height=400)
+    # Show loading spinner while map renders
+    with st.spinner("🗺️ Rendering interactive map..."):
+        st_folium(m, width=1200, height=400, returned_objects=[])
     
     st.caption("Legend: 🟢 <30min | 🔵 30-45min | 🟠 45-60min | 🔴 >60min | ⚫ No route")
 
@@ -236,59 +242,63 @@ with tab2:
     
     with col1:
         # Commute time distribution
-        fig_commute = px.histogram(
-            filtered_df, 
-            x='total_commute_min',
-            title='Commute Time Distribution',
-            labels={'total_commute_min': 'Commute Time (minutes)'},
-            color_discrete_sequence=['#0066cc']
-        )
-        st.plotly_chart(fig_commute, use_container_width=True)
+        with st.spinner("📊 Generating commute time chart..."):
+            fig_commute = px.histogram(
+                filtered_df, 
+                x='total_commute_min',
+                title='Commute Time Distribution',
+                labels={'total_commute_min': 'Commute Time (minutes)'},
+                color_discrete_sequence=['#0066cc']
+            )
+            st.plotly_chart(fig_commute, width='stretch')
     
     with col2:
         # Adoption score distribution
-        fig_adoption = px.histogram(
-            filtered_df,
-            x=f'adoption_score_{scenario}',
-            title=f'Adoption Score Distribution ({scenario})',
-            labels={f'adoption_score_{scenario}': 'Adoption Score'},
-            color_discrete_sequence=['#00cc66']
-        )
-        st.plotly_chart(fig_adoption, use_container_width=True)
+        with st.spinner("📊 Generating adoption score chart..."):
+            fig_adoption = px.histogram(
+                filtered_df,
+                x=f'adoption_score_{scenario}',
+                title=f'Adoption Score Distribution ({scenario})',
+                labels={f'adoption_score_{scenario}': 'Adoption Score'},
+                color_discrete_sequence=['#00cc66']
+            )
+            st.plotly_chart(fig_adoption, width='stretch')
     
     col3, col4 = st.columns(2)
     
     with col3:
         # Transport attractiveness vs Adoption score
-        fig_scatter = px.scatter(
-            filtered_df,
-            x='transport_attractiveness',
-            y=f'adoption_score_{scenario}',
-            title='Transport vs Adoption Score',
-            labels={
-                'transport_attractiveness': 'Transport Attractiveness',
-                f'adoption_score_{scenario}': 'Adoption Score'
-            },
-            color='total_commute_min',
-            color_continuous_scale='RdYlGn_r'
-        )
-        st.plotly_chart(fig_scatter, use_container_width=True)
+        with st.spinner("📊 Generating scatter plot..."):
+            fig_scatter = px.scatter(
+                filtered_df,
+                x='transport_attractiveness',
+                y=f'adoption_score_{scenario}',
+                title='Transport vs Adoption Score',
+                labels={
+                    'transport_attractiveness': 'Transport Attractiveness',
+                    f'adoption_score_{scenario}': 'Adoption Score'
+                },
+                color='total_commute_min',
+                color_continuous_scale='RdYlGn_r'
+            )
+            st.plotly_chart(fig_scatter, width='stretch')
     
     with col4:
         # Distance vs Commute time
-        fig_distance = px.scatter(
-            filtered_df,
-            x='distance_km',
-            y='total_commute_min',
-            title='Distance vs Commute Time',
-            labels={
-                'distance_km': 'Distance from Office (km)',
-                'total_commute_min': 'Commute Time (minutes)'
-            },
-            color=f'adoption_score_{scenario}',
-            color_continuous_scale='viridis'
-        )
-        st.plotly_chart(fig_distance, use_container_width=True)
+        with st.spinner("📊 Generating distance chart..."):
+            fig_distance = px.scatter(
+                filtered_df,
+                x='distance_km',
+                y='total_commute_min',
+                title='Distance vs Commute Time',
+                labels={
+                    'distance_km': 'Distance from Office (km)',
+                    'total_commute_min': 'Commute Time (minutes)'
+                },
+                color=f'adoption_score_{scenario}',
+                color_continuous_scale='viridis'
+            )
+            st.plotly_chart(fig_distance, width='stretch')
 
 # Tab 3: Employee Explorer
 with tab3:
@@ -312,11 +322,12 @@ with tab3:
         'distance_km', 'monthly_driving_cost'
     ]
     
-    st.dataframe(
-        display_df[display_cols].head(100),
-        use_container_width=True,
-        hide_index=True
-    )
+    with st.spinner("👥 Loading employee data table..."):
+        st.dataframe(
+            display_df[display_cols].head(100),
+            width='stretch',
+            hide_index=True
+        )
     
     # Download button
     csv = display_df[display_cols].to_csv(index=False)
@@ -345,7 +356,7 @@ with tab4:
         })
     
     scenario_df = pd.DataFrame(scenario_metrics)
-    st.dataframe(scenario_df, use_container_width=True, hide_index=True)
+    st.dataframe(scenario_df, width='stretch', hide_index=True)
     
     # Financial analysis
     st.subheader("Financial Analysis")

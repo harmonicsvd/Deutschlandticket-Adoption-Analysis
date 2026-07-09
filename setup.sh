@@ -17,10 +17,31 @@ fi
 echo "✅ Conda found: $(conda --version)"
 echo ""
 
-# Create conda environment
-echo "📦 Creating conda environment 'jandj'..."
-conda create -n jandj python=3.10 -y
-echo "✅ Environment 'jandj' created"
+# Check if environment exists and is functional
+if conda env list | grep -q "^jandj "; then
+    echo "ℹ️  Environment 'jandj' already exists."
+    # Check if environment has pip (indicates it's properly set up)
+    if conda run -n jandj python -c "import pip" 2>/dev/null; then
+        echo "✅ Environment is properly configured. Skipping creation."
+    else
+        echo "⚠️  Environment exists but appears incomplete (no pip)."
+        echo "   Recreating environment..."
+        conda remove -n jandj --all -y 2>/dev/null || rm -rf /Users/varadkulkarni/miniconda3/envs/jandj
+        echo "📦 Creating conda environment 'jandj'..."
+        conda create -n jandj python=3.10 -y
+        echo "✅ Environment 'jandj' created"
+    fi
+else
+    # Check if directory exists but is not a valid conda environment
+    if [ -d "/Users/varadkulkarni/miniconda3/envs/jandj" ]; then
+        echo "⚠️  Directory exists but is not a valid conda environment."
+        echo "   Removing corrupted directory..."
+        rm -rf /Users/varadkulkarni/miniconda3/envs/jandj
+    fi
+    echo "📦 Creating conda environment 'jandj'..."
+    conda create -n jandj python=3.10 -y
+    echo "✅ Environment 'jandj' created"
+fi
 echo ""
 
 # Activate environment
@@ -31,15 +52,27 @@ echo "✅ Environment activated"
 echo ""
 
 # Install requirements
-echo "📥 Installing Python packages..."
-pip install -r requirements.txt
-echo "✅ Packages installed"
+echo "📥 Checking Python packages..."
+# Check if key packages are already installed
+if conda run -n jandj python -c "import streamlit, pandas, folium" 2>/dev/null; then
+    echo "ℹ️  Key packages already installed. Skipping installation."
+    echo "   (Run 'conda run -n jandj pip install -r requirements.txt' manually if you want to update packages)"
+else
+    echo "📥 Installing Python packages..."
+    conda run -n jandj pip install -r requirements.txt
+    echo "✅ Packages installed"
+fi
 echo ""
 
 # Create necessary directories
-echo "📁 Creating data directories..."
-mkdir -p data
-echo "✅ Data directories created"
+echo "📁 Checking data directories..."
+if [ -d "data" ]; then
+    echo "ℹ️  Data directory already exists. Skipping creation."
+else
+    echo "📁 Creating data directories..."
+    mkdir -p data
+    echo "✅ Data directories created"
+fi
 echo ""
 
 echo "🎉 Setup Complete!"
@@ -82,5 +115,5 @@ if [ "$launch_dashboard" = "y" ] || [ "$launch_dashboard" = "Y" ]; then
     echo "🚀 Launching Streamlit dashboard..."
     echo "Access at: http://localhost:8501"
     echo ""
-    streamlit run streamlit_dashboard.py
+    conda run -n jandj streamlit run streamlit_dashboard.py
 fi
