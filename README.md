@@ -1,5 +1,7 @@
 # Deutschlandticket Adoption Analysis - Project Overview
 
+![Dashboard Screenshot](dashboard.png)
+
 ## Project Goal
 Analyze whether introducing the Deutschlandticket could make commuting easier, cheaper, and more sustainable for J&J employees in the Hamburg metropolitan area.
 
