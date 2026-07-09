@@ -29,13 +29,15 @@ mkdir -p data
 
 ## 📊 Interactive Dashboard
 
-After running the analysis notebooks, launch the interactive Streamlit dashboard:
+The interactive Streamlit dashboard can be launched immediately after setup using the pre-generated data:
 
 ```bash
 streamlit run streamlit_dashboard.py
 ```
 
 The dashboard will be available at `http://localhost:8501`
+
+**Note:** The dashboard uses pre-generated data files included in the repository, so you don't need to run the analysis notebooks first. Only run the notebooks if you want to regenerate the data from scratch.
 
 ### Dashboard Features:
 - **🗺️ Interactive Map** - Employee locations, office, HVV stations with layer control
@@ -106,9 +108,12 @@ The dashboard will be available at `http://localhost:8501`
 - **Geocoding:** LocationIQ address to coordinates
 
 ### Caching Strategy
-- OTP routing cache: `data/routing_cache.csv` (avoid redundant transit route calculations)
-- Car routing cache: `data/car_routing_cache.csv` (avoid redundant car route calculations)
-- Benefits: Faster re-runs, API quota conservation
+- **Geocoding cache:** `data/geocoding_cache.csv` (avoid redundant address geocoding API calls)
+- **Walking distances cache:** `data/candidate_walking_distances_cache.csv` (avoid redundant walking distance API calls)
+- **OTP routing cache:** `data/routing_cache.csv` (avoid redundant transit route calculations)
+- **Car routing cache:** `data/car_routing_cache.csv` (avoid redundant car route calculations)
+- **Benefits:** Faster re-runs, API quota conservation, cost savings
+- **Note:** Cache files are pre-generated and included in the repository for immediate use
 
 ### Key Formulas
 **Optimal Commute Time:**
