@@ -260,7 +260,7 @@ Adoption Score = (Transport Attractiveness Ã— 0.6) + (Financial Attractiveness Ã
 ### Methodology Limitations
 - Single time point analysis (08:00 only) - represents morning commute snapshot
 - No evening commute analysis or rush hour variations
-- **One-way commute time only** - Total commute time represents home-to-office journey only, not round-trip. Return journey times may differ due to transit schedules and walking patterns
+- **One-way commute time only** - Total commute time represents home-to-office journey only, not round-trip. Return journey times may differ due to evening transit schedules and service frequency
 - Cost advantage so large that subsidy scenarios don't differentiate adoption
 - Hamburg-specific analysis (may not generalize to other locations)
 - No employee preference data included
