@@ -207,11 +207,13 @@ If you want to regenerate the transit routing data from scratch (notebook 04), y
 - **Note:** Cache files are pre-generated and included in the repository for immediate use
 
 ### Key Formulas
-**Optimal Commute Time (one-way only):**
+**Optimal Commute Time (round-trip):**
 ```
-Total Commute = walk_home_to_station + transit_time + walk_station_to_office
+Morning Journey = walk_home_to_station + transit_time_morning + walk_station_to_office
+Evening Journey = walk_office_to_station + transit_time_evening + walk_station_to_home
+Total Round-Trip = Morning Journey + Evening Journey
 ```
-*Note: This represents home-to-office journey only, not round-trip.*
+*Note: This represents complete daily round-trip commute (home to office and back).*
 
 **Adoption Score:**
 ```
@@ -220,31 +222,33 @@ Adoption Score = (Transport Attractiveness × 0.6) + (Financial Attractiveness �
 
 ## Key Results
 
-### Commute-Time Distribution
+### Commute-Time Distribution (Round-Trip)
 - 178 total employees (synthetic)
 - 131 (73.6%) have valid public transport routes
 - 47 (26.4%) have no viable public transport routes
-- 38.9% have reasonable commutes (<45 minutes)
-- 48.1% have long commutes (>60 minutes)
+- 38.2% have reasonable round-trip commutes (<90 minutes)
+- 47.3% have very long round-trip commutes (>120 minutes)
+- Average round-trip commute: 118 minutes
 
-### Deutschlandticket Adoption Potential
-- 59% have High/Medium adoption potential
-- Adoption driven by time/convenience (transport attractiveness: 62.2/100)
-- Financial attractiveness is near-perfect (99.7/100) due to massive cost savings
-- Cost advantage exists regardless of subsidy level
+### Deutschlandticket Adoption Potential (Round-Trip)
+- 12.2% have Medium adoption potential
+- 30.5% have Low adoption potential
+- 57.3% have Very Low adoption potential
+- Transport attractiveness: 59.8/100 (lower due to round-trip time burden)
+- Financial attractiveness: 4.6/100 (excellent cost savings remain)
+- Average monthly savings: €149 (driving cost: €212 vs ticket: €63)
 
-### Geographic Connectivity
-- Strong connectivity areas: 51 employees (38.9%) with commute times <45 minutes
-- Weak connectivity areas: 63 employees (48.1%) with commute times >60 minutes
+### Geographic Connectivity (Round-Trip)
+- Strong connectivity areas: 50 employees (38.2%) with round-trip <90 minutes
+- Weak connectivity areas: 62 employees (47.3%) with round-trip >120 minutes
+- Average transport attractiveness in strong areas: 76.6/100
+- Average transport attractiveness in weak areas: 42.9/100
 - No PT available: 47 employees (26.4%) have no viable public transport routes
-- Strong connectivity areas have average transport attractiveness of 75.7/100
-- Weak connectivity areas have average transport attractiveness of 48.9/100
-- Geographic distribution: Strong connectivity concentrated in 10-20km range, weak connectivity in 30-50km range
 
 ### Cost Scenario Analysis
 **Finding:** All three cost scenarios (Company Pays Full, 50% Subsidy, Employee Pays Full) showed identical adoption results
 
-**Reason:** Average driving cost is €343/month vs. Deutschlandticket cost of €63/month. This means employees save approximately €280/month regardless of who pays. The cost advantage is so large that whether the company pays or the employee pays doesn't change the financial attractiveness of the Deutschlandticket.
+**Reason:** Average driving cost is €212/month vs. Deutschlandticket cost of €63/month. This means employees save approximately €149/month regardless of who pays. The cost advantage is so large that whether the company pays or the employee pays doesn't change the financial attractiveness of the Deutschlandticket.
 
 **Implication:** Adoption decisions are driven by time and convenience (practicality), not by who pays for the ticket. Even when employees pay the full €63/month, the cost savings over driving are so substantial that cost doesn't differentiate between scenarios.
 
@@ -258,9 +262,9 @@ Adoption Score = (Transport Attractiveness × 0.6) + (Financial Attractiveness �
 - Parking cost: €50/month (assumes paid parking, may not apply if company provides free parking)
 
 ### Methodology Limitations
-- Single time point analysis (08:00 only) - represents morning commute snapshot
-- No evening commute analysis or rush hour variations
-- **One-way commute time only** - Total commute time represents home-to-office journey only, not round-trip. Return journey times may differ due to evening transit schedules and service frequency
+- Single time point analysis (08:00 morning, 17:00 evening) - represents typical workday commute
+- No rush hour variations or different departure times analyzed
+- **Round-trip commute time** - Total commute time represents complete daily journey (home to office and back). Evening return times may differ due to transit schedules and service frequency
 - Cost advantage so large that subsidy scenarios don't differentiate adoption
 - Hamburg-specific analysis (may not generalize to other locations)
 - No employee preference data included
